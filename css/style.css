@@ -1,0 +1,133 @@
+ h3 {
+ 	color: white;
+	background: darkblue; 
+	font-family: 'Montserrat', sans-serif; 
+	text-align: center; 
+      text-shadow: 0px 3px 0px #b2a98f,
+             0px 14px 10px rgba(0,0,0,0.15),
+             0px 24px 2px rgba(0,0,0,0.1),
+             0px 34px 30px rgba(0,0,0,0.1);
+      font-family: 'Exo', sans-serif;
+ }
+
+
+ 
+ h4 {
+ 	color: red;
+      background-color: black;
+      font-family: 'Exo 2', sans-serif;
+ }
+ p {
+ 	color: orange;
+      font-family: 'Exo 2', sans-serif; 
+ }
+ .class {
+
+ }
+ h1 {
+ 	color:orange;
+      background-color: black;
+      text-shadow: 0 1px 0 #ccc,
+             0 2px 0 #c9c9c9,
+             0 3px 0 #bbb,
+             0 4px 0 #b9b9b9,
+             0 5px 0 #aaa,
+             0 6px 1px rgba(0,0,0,.1),
+             0 0 5px rgba(0,0,0,.1),
+             0 1px 3px rgba(0,0,0,.3),
+             0 3px 5px rgba(0,0,0,.2),
+             0 5px 10px rgba(0,0,0,.25),
+             0 10px 10px rgba(0,0,0,.2),
+             0 20px 20px rgba(0,0,0,.15);
+      font-family: 'Exo', sans-serif;
+ }
+
+
+
+
+ .parallax {
+    min-height: 587px;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#bild1{
+    background-image: url("../bilder/maxresdefault12.jpg");
+}
+
+
+
+.navbar-brand {
+      font-family: 'Ubuntu', sans-serif;
+      background-color: red;
+      color: black;
+}
+.navbar-inverse {
+      font-family: 'Josefin Sans', sans-serif;
+      background-color: red;
+      color: black;
+}
+
+// Tala om att det är en Angular-app med firebase
+var app = angular.module("app", ["firebase"]);
+
+// Rätt inställning för att Firebase ska fungera. Varje Firebase-konto har olika inställningar
+// så se till att lägga dina egna här!
+var config = {
+    apiKey: "AIzaSyAYJfunxxlpcr2tV5o-NFoSHOFkbbsO0nY",
+    authDomain: "test-7b89e.firebaseapp.com",
+    databaseURL: "https://test-7b89e.firebaseio.com",
+    storageBucket: "test-7b89e.appspot.com",
+    messagingSenderId: "854909664851"
+};
+firebase.initializeApp(config);
+
+// Vi skapar en blogPost-fabrik som hämtar blogg-inlägg från firebase
+app.factory("blogPosts", ["$firebaseArray",
+  function($firebaseArray) {
+    // create a reference to the database location where we will store our data
+    var ref = firebase.database().ref().child("posts");
+
+    // this uses AngularFire to create the synchronized array
+    return $firebaseArray(ref);
+  }
+]);
+
+// Filter som litar på vad du skriver
+app.filter('trustAsHTML', ['$sce', function($sce){
+    return function(text) {
+        return $sce.trustAsHtml(text);
+    };
+}]);
+
+// Här i "controllern" så kan vi bestämma vad som ska hända med vår HTML
+app.controller("BlogCtrl", ["$scope", "blogPosts",
+  // Vi skickar med vår blogPost-fabrik och $scope för att använda
+  function($scope, blogPosts) {
+    // Vi gör så att vi kan komma åt inläggen i blogPost-fabriken med ng-model
+    $scope.posts = blogPosts;
+
+    $scope.post = {
+        title: "",
+        body: "",
+        author: ""
+    };
+    // Vi skapar en funktion som vi kan köra i ng-submit för att skicka inlägget till databasen
+    $scope.addPost = function() {
+        // Här lägger vi till vårt inlägg ($scope.post) till listan med inlägg.
+        // Det sparas automatiskt i Firebase-databasen.
+        $scope.posts.$add($scope.post);
+
+        // Tömmer texten i textfälten
+        $scope.post = {
+            title: "",
+            body: "",
+            author: ""
+        };
+    };
+
+  }
+
+]);
